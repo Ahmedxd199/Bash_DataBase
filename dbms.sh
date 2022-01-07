@@ -30,4 +30,9 @@ function MainTables
 }
 
 
+function ReadTableNameFromUSer
+{
+    Tablename=$(whiptail --inputbox "Enter Table name" 8 39 3>&1 1>&2 2>&3)
+}
+
 ]
