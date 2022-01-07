@@ -1,5 +1,8 @@
 #!/bin/bash
 
+shopt -s extglob
+export LC_COLLATE=C
+
 
 
 function MainTables
@@ -179,10 +182,23 @@ function MainDB
     esac
     done
 }
-MainDB
 
-readDBUser(){
-
-DBName=$(whiptail --inputbox "Enter Database Name" 8 39 --title "Database" 3>&1 1>&2 2>&3)
+function ReadDBNameFromUSer
+{
+    DBname=$(whiptail --inputbox "Enter Database name" 8 39  --title "Database" 3>&1 1>&2 2>&3)
 }
 
+function Create_DB
+{ 
+    ReadDBNameFromUSer
+    if test -d $DBname
+    then
+        zenity --warning --title="Already exists!" --text="$DBname already exists!" --no-wrap
+    else
+        mkdir $DBname
+        zenity --info --title="success" --text="Database $DBname has been created successfully :)" --no-wrap
+    fi
+
+}
+
+MainDB
