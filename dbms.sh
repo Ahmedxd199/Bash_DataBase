@@ -150,3 +150,33 @@ function Create_table
 
 
 ]
+
+function MainDB
+{  
+    while input=$(whiptail --title "Database Menu" --menu "Choose an option" 15 50 6 \
+    "1" "Create Database" \
+    "2" "Open Database" \
+    "3" "Drop Database"  \
+    "4" "List Database"   \
+    "5" "Exit" 3>&1 1>&2 2>&3 )
+    do
+    case $input in
+            1 ) 
+                Create_DB
+            ;;
+            2 ) 
+                Open_DB 
+            ;;
+            3 ) 
+                Drop_DB
+            ;;
+            4 ) 
+                list_DBs 
+            ;;
+            5 ) 
+                clear; exit 0
+            ;;
+    esac
+    done
+}
+MainDB
