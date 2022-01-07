@@ -180,3 +180,9 @@ function MainDB
     done
 }
 MainDB
+
+readDBUser(){
+
+DBName=$(whiptail --inputbox "Enter Database Name" 8 39 --title "Database" 3>&1 1>&2 2>&3)
+}
+
