@@ -198,5 +198,18 @@ function Create_DB
     fi
 
 }
+function Open_DB
+{
+    ReadDBNameFromUSer
+    if test -d $DBname
+    then
+        cd $DBname
+        echo "done"
+        MainTables
+    else
+        zenity --error --title="Error!" --text="$DBname doesn't exist!" --no-wrap
+    fi
+
+}
 
 MainDB
