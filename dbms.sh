@@ -1,7 +1,5 @@
 #!/bin/bash
 
-shopt -s extglob
-export LC_COLLATE=C
 
 
 
