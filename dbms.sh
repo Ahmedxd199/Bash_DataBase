@@ -222,5 +222,26 @@ function list_DBs
    zenity --error --title="Error!" --text="No Databases to show!" --no-wrap
    fi
 }
+function Drop_DB
+{
+    ReadDBNameFromUSer
+    if [ -d $DBname ]
+    then
+        input=$(whiptail --title "Are you sure you want to delete this Database?" --fb --menu "Confirm" 15 50 6 \
+            "1" "yes" \
+            "2" "no"  3>&1 1>&2 2>&3)
+            case $input in
+                    1 )  rm -r $DBname
+                         zenity --info --title="Success" --text="$DBname has been removed successfully" --no-wrap
+                    ;;
+                    2 )
+                        clear
+                    ;;
+            esac
+    else
+        zenity --error --title="Error!" --text="$DBname doesn't exist!" --no-wrap
+    fi
+
+}
 
 MainDB
