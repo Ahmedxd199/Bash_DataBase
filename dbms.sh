@@ -211,5 +211,16 @@ function Open_DB
     fi
 
 }
+function list_DBs
+{
+   if [ "$(ls -d */)" ]
+   then
+    ls > .listOfDBs
+    whiptail --title "Available Databases" --fb --scrolltext --textbox .listOfDBs 12 80
+   else
+
+   zenity --error --title="Error!" --text="No Databases to show!" --no-wrap
+   fi
+}
 
 MainDB
