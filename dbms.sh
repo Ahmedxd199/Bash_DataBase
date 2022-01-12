@@ -244,4 +244,166 @@ function Drop_DB
 
 }
 
+
+
+function Open_Certain_table
+{
+    ReadTableNameFromUSer
+    if [ -f $Tablename ]
+    then
+        #cat $Tablename
+        Record_stage $Tablename
+    else
+        zenity --error --title="Error!" --text="$Tablename doesn't exist!" --no-wrap
+    fi
+
+}
+
+
+function Record_stage
+{
+    Tablename=$1
+    while input=$(whiptail --title "Records Menu" --menu "Choose an option" 15 50 6 \
+     "1" "Show table" \
+    "2" "Insert New Record"  \
+    "3" "Delete Record"  \
+    "4" "Update Certain Cell"  \
+    "5" "Back to Tables Menu"   \
+    "6" "Exit" 3>&1 1>&2 2>&3 )
+    do  #read input
+    case $input in
+            1 ) DescribeTable $Tablename
+            ;;
+            2 ) InsertInto $Tablename
+            ;;
+            3 ) delete_record $Tablename
+            ;;
+            4 ) Update_cell $Tablename
+            ;; 
+            5 ) clear; MainTables  
+            ;;
+            6 ) clear; exit 0
+            ;;
+    esac
+    done
+    
+}
+
+
+
+function InsertInto
+{
+      Tablename=$1
+    #   echo $Tablename > students;
+      row=""
+      if ! [ -f $Tablename ]
+      then 
+           zenity --error --title="Error!" --text="Table $Tablename doesn't exist!" --no-wrap
+      else
+      #Get num of rows stored in metadata file which represents the num of columns
+      noOfCol=`(awk -F: 'END{print NR}' .$Tablename)`
+      idx=2
+      fs="|"
+      colName=""
+      colType=""
+      colConstraint=""
+      until [ $idx -gt $noOfCol ]
+      do
+         colName=`(awk -F'|' '{if(NR=='$idx') print $1}' .$Tablename)`
+         colType=`(awk -F'|' '{if(NR=='$idx') print $2 }' .$Tablename)` 
+         colConstraint=`(awk -F'|' '{if(NR=='$idx') print $3}' .$Tablename)`
+         data=$(whiptail --inputbox "Enter data of column $colName" 8 39 3>&1 1>&2 2>&3)
+         #Validate data type 
+         if [[ "$colType" == "str" ]]   
+         then
+           while [[ true ]]
+            do
+                if [[ -z "$data" ]]
+                then
+                      zenity --error --title="Error!" --text="Empty string! \n " --no-wrap
+                      data=$(whiptail --inputbox "Enter valid data (string)" 8 39 3>&1 1>&2 2>&3)
+                else 
+                    case $data in
+                        +([a-zA-Z]) )
+                            break
+                            ;;
+                        *)
+                            zenity --error --title="Error!" --text="Invalid data type! \n " --no-wrap
+                            data=$(whiptail --inputbox "Enter valid data type (string)" 8 39 3>&1 1>&2 2>&3)
+                            ;;
+                        esac
+                fi
+            done
+         elif [[ "$colType" == "int" ]]
+         then
+           while [[ true ]]
+            do
+                case $data in 
+                    +([0-9]) )
+                            # Check if the entered PK already exists
+                                if [[ "$colConstraint" == "PK" ]]
+                                then
+                                    flag2=1
+                                    let exist=0
+                                    while [[ true ]]
+                                    do
+                                        if [[ -z "$data" ]]
+                                        then 
+                                                zenity --error --title="Error!" --text="PK can't be NULL ! \n " --no-wrap
+                                                data=$(whiptail --inputbox "Enter valid Primary key" 8 39 3>&1 1>&2 2>&3)
+
+                                        elif ! [[ $data =~ ^[1-9][0-9]*$ ]]
+                                        then
+                                                zenity --error --title="Error!" --text="Invalid data type! \n " --no-wrap
+                                                data=$(whiptail --inputbox "Enter valid data type (int)" 8 39 3>&1 1>&2 2>&3)
+                                        else
+                                            exist=`(awk -F'|' '{if('$data'==$('$idx'-1)) print $('$idx'-1)}' $Tablename)` 
+                                            if ! [[ $exist -eq 0  ]]
+                                            then
+                                                zenity --error --title="Error!" --text="PK already exists! \n " --no-wrap
+                                                data=$(whiptail --inputbox "Enter unique Primary key" 8 39 3>&1 1>&2 2>&3)
+                                                set exist=0
+                                            else
+                                                break
+                                            fi
+                                        fi
+                                    done
+                                fi
+                                break
+                        ;;
+                    *) zenity --error --title="Error!" --text="Invalid data type! \n " --no-wrap
+                        data=$(whiptail --inputbox "Enter valid data type (int)" 8 39 3>&1 1>&2 2>&3)
+                        ;;
+                    esac
+            done
+        fi
+         
+        # Set row data
+        if ! [ $idx -eq $noOfCol ]
+        then
+            row=$row$data$fs  
+        else
+            row=$row$data
+        fi
+        ((idx++))
+      done
+     
+      echo $row >> $Tablename
+      if [ $? -eq 0 ]
+        then 
+            zenity --info --title="Success" --text="Data inserted successfully \n " --no-wrap
+            #echo "Data inserted successfully"
+        else
+            zenity --error --title="Error" --text="Filed to insert data \n " --no-wrap
+            #echo "Error !"
+        fi
+      fi
+}
+
+
+
+
+
+
+
 MainDB
