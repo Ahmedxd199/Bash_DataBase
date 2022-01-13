@@ -407,16 +407,17 @@ function delete_record
    Tablename=$1
    let idx=2
    #pk=$(zenity --entry --title="Enter PK of the record you want to delete")
-   pk=$(whiptail --inputbox "Enter PK of the record you want to delete" 8 39 3>&1 1>&2 2>&3)
-   noOfCol=$(awk -F: 'END{print NR}' .$Tablename)
+   pk=$(whiptail --inputbox "Enter PK of the record you want to delete" 8 39 3>&1 1>&2 2>&3)   # for ex) pk = 3
+   noOfCol=$(awk -F: 'END{print NR}' .$Tablename)    
    until [ $idx -gt $noOfCol ]
     do
-         colConstraint=$(awk -F'|' '{if(NR=='$idx') print $3}' .$Tablename)
-         if [[ "$colConstraint" == "PK" ]]
+         colConstraint=$(awk -F'|' '{if(NR=='$idx') print $3}' .$Tablename)      # colConstraint = pk or ""
+         if [[ "$colConstraint" == "PK" ]]     
         then
             # GET the Record number using the PK 
             #check the entered Pk with all values by feild number 'idx'-1
-            recordnumber=$(awk -F'|' '{if($('$idx'-1)=='$pk') print NR}' $Tablename)
+            recordnumber=$(awk -F'|' '{if($('$idx'-1)=='$pk') print NR}' $Tablename) #recordnumber = 3
+         #   echo $recordnumber >> test
             # Check if the entered PK exist? "Delete" : "not found!" 
             if [[ "$recordnumber" =~ ^[0-9]+$ ]]
             then
@@ -451,7 +452,27 @@ function delete_record
 }
 
 
+function Drop_table
+{
+    ReadTableNameFromUSer
+    if [ -f $Tablename ]
+    then 
+        input=$(whiptail --title "Are you sure you want to delete this table?" --fb --menu "Confirm" 15 50 6 \
+            "1" "yes" \
+            "2" "no"  3>&1 1>&2 2>&3)
+            case $input in
+                    1 )  rm $Tablename .$Tablename
+                         zenity --info --title="Success" --text="$Tablename Table has been removed successfully :)" --no-wrap
+                    ;;
+                    2 ) 
+                        clear
+                    ;;
+            esac
+    else
+        zenity --error --title="Error!" --text="$Tablename Table doesn't exist!" --no-wrap
+    fi  
 
+}
 
 
 
