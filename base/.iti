@@ -1,0 +1,3 @@
+Column Name|Type|Primary Key
+id|int|PK
+std_name|str|

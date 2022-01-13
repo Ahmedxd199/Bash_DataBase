@@ -402,6 +402,55 @@ function InsertInto
 
 
 
+function delete_record
+{
+   Tablename=$1
+   let idx=2
+   #pk=$(zenity --entry --title="Enter PK of the record you want to delete")
+   pk=$(whiptail --inputbox "Enter PK of the record you want to delete" 8 39 3>&1 1>&2 2>&3)
+   noOfCol=$(awk -F: 'END{print NR}' .$Tablename)
+   until [ $idx -gt $noOfCol ]
+    do
+         colConstraint=$(awk -F'|' '{if(NR=='$idx') print $3}' .$Tablename)
+         if [[ "$colConstraint" == "PK" ]]
+        then
+            # GET the Record number using the PK 
+            #check the entered Pk with all values by feild number 'idx'-1
+            recordnumber=$(awk -F'|' '{if($('$idx'-1)=='$pk') print NR}' $Tablename)
+            # Check if the entered PK exist? "Delete" : "not found!" 
+            if [[ "$recordnumber" =~ ^[0-9]+$ ]]
+            then
+                 input=$(whiptail --title "Are you sure you want to delete this record?" --fb --menu "Confirm deletion" 15 50 6 \
+                "1" "yes" \
+                "2" "no"  3>&1 1>&2 2>&3)
+                case $input in
+                        1 ) 
+                            # Delete the record using the record number, then redirect to a new file and rename its name with table name :)
+                            awk -v n=$recordnumber 'NR == n {next} {print}' $Tablename > tmp && mv tmp $Tablename
+                        ;;
+                        2 ) 
+                            zenity --warning --title="Warning" --text="Terminating without deleting" --no-wrap
+                            break
+                        ;;
+                esac
+            else
+                zenity --error --title="Error!" --text="$pk doesn't exist!" --no-wrap
+                break
+            fi
+            if [ $? -eq 0 ]
+            then 
+                zenity --info --title="Success" --text="Record has been deleted successfully" --no-wrap
+            else
+                 zenity --error --title="Error!" --text="Error deleting the record!" --no-wrap
+            fi
+            break
+        fi
+
+    ((idx++))
+    done
+}
+
+
 
 
 
