@@ -474,6 +474,12 @@ function Drop_table
 
 }
 
+function List_All_Tables
+{
+    ls > .listOftables
+    whiptail --title "Available Tables" --fb --scrolltext --textbox .listOftables 12 80
+}
+
 
 
 MainDB
