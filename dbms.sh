@@ -272,7 +272,7 @@ function Record_stage
     "6" "Exit" 3>&1 1>&2 2>&3 )
     do  #read input
     case $input in
-            1 ) DescribeTable $Tablename
+            1 ) Select_From_table $Tablename
             ;;
             2 ) InsertInto $Tablename
             ;;
@@ -479,6 +479,34 @@ function List_All_Tables
     ls > .listOftables
     whiptail --title "Available Tables" --fb --scrolltext --textbox .listOftables 12 80
 }
+
+
+function Select_From_table
+{
+    SortTableByPk
+    awk -F "|" '{for(i=1;i<=NF;i++){printf "|%-10s", $i};printf "\n"}' $Tablename > .TableContent
+    #cat $Tablename > .TableContent
+    whiptail --title "$Tablename" --fb --scrolltext --textbox .TableContent 12 80
+}
+function SortTableByPk
+{
+    let idx=2
+    until [ $idx -gt $noOfCol ]
+      do
+            colConstraint=`(awk -F'|' '{if(NR=='$idx') print $3}' .$Tablename)`
+            if [[ "$colConstraint" == "PK" ]]
+            then
+                 let m=$idx-1
+                 sort -k $m -n $Tablename > tmp && mv tmp $Tablename
+                break
+            fi
+      ((idx++))
+      done
+}
+
+
+
+
 
 
 
