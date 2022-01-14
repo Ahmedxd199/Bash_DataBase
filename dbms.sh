@@ -503,6 +503,81 @@ function SortTableByPk
       ((idx++))
       done
 }
+function Update_cell
+{
+   Tablename=$1
+   let idx=2
+   updateType=""
+   let colFound=0
+   colName=""
+   declare pk
+   declare recordnumber
+   declare colname=$(whiptail --inputbox "Enter column name you want to update" 8 39 3>&1 1>&2 2>&3)
+   declare noOfCol=$(awk -F: 'END{print NR}' .$Tablename)
+
+   input=$(whiptail --title "Would you like to update by primary key ?" --fb --menu "Update options" 15 50 6 \
+        "1" "yes" \
+        "2" "no"  3>&1 1>&2 2>&3)
+        case $input in
+                1 ) updateType="y"
+                    pk=$(whiptail --inputbox "Enter PK of the record you want to update" 8 39 3>&1 1>&2 2>&3)
+                    newValue=$(whiptail --inputbox "Enter new value" 8 39 3>&1 1>&2 2>&3)
+                ;;
+                2 ) updateType="n"
+                    oldValue=$(whiptail --inputbox "Enter old value" 8 39 3>&1 1>&2 2>&3)
+                    newValue=$(whiptail --inputbox "Enter new value" 8 39 3>&1 1>&2 2>&3)
+                ;;
+        esac
+   until [ $idx -gt $noOfCol ]
+    do
+        colName=$(awk -F'|' '{if(NR=='$idx') print $1}' .$Tablename)
+        colConstraint=$(awk -F'|' '{if(NR=='$idx') print $3}' .$Tablename)
+
+        if [[ "$updateType" == "y" ]]
+        then
+            if [[ "$colConstraint" == "PK" ]]
+            then
+                recordnumber=$(awk -F'|' '{if($('$idx'-1)=='$pk') print NR}' $Tablename)
+                if ! [[ "$recordnumber" =~ ^[0-9]+$ ]]
+                then
+                      zenity --error --title="Error!" --text="$pk doesn't exist!" --no-wrap
+                      break 
+
+                fi
+            fi
+        fi
+
+        if [[ "$colName" == "$colname" ]]
+        then
+                ((colFound++))
+                if [[ "$colConstraint" == "PK" ]]
+                then
+                        zenity --error --title="Error!" --text="It is not allowed to update a Primary key" --no-wrap
+                        unset colFound
+                        colFound=0
+                        break
+                fi
+                
+                if [[ "$updateType" == "n"  ]]
+                then
+                    awk -F'|' -v new=$newValue -v old=$oldValue '$('$idx'-1)==old {$('$idx'-1)=new} {print}' OFS='|' $Tablename > tmp && mv tmp $Tablename
+                else        
+                     awk -F'|' -v new=$newValue 'NR=='$recordnumber'{$('$idx'-1)=new} {print}' OFS='|' $Tablename > tmp && mv tmp $Tablename
+                fi
+             
+            break
+        fi
+
+    ((idx++))
+    done
+    if [[ $colFound -gt 0 ]]
+    then 
+        zenity --info --title="Success!" --text="Cell updated successfully" --no-wrap
+    else
+        zenity --error --title="Error!" --text="Error updating $colname" --no-wrap
+    fi
+
+}
 
 
 
