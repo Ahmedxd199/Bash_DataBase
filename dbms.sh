@@ -184,6 +184,9 @@ function MainDB
 function ReadDBNameFromUSer
 {
     DBname=$(whiptail --inputbox "Enter Database name" 8 39  --title "Database" 3>&1 1>&2 2>&3)
+     if ! [ test -d database ]; 
+    then mkdir database
+    fi
 }
 
 function Create_DB
