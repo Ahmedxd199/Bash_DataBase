@@ -193,7 +193,7 @@ function Create_DB
     then
         zenity --warning --title="Already exists!" --text="$DBname already exists!" --no-wrap
     else
-        mkdir $DBname
+        mkdir /database/$DBname
         zenity --info --title="success" --text="Database $DBname has been created successfully :)" --no-wrap
     fi
 
@@ -213,9 +213,9 @@ function Open_DB
 }
 function list_DBs
 {
-   if [ "$(ls -d */)" ]
+   if [ "$(ls -A */)" ]
    then
-    ls > .listOfDBs
+    ls ./database > .listOfDBs
     whiptail --title "Available Databases" --fb --scrolltext --textbox .listOfDBs 12 80
    else
 
