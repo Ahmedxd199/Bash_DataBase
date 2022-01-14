@@ -189,11 +189,11 @@ function ReadDBNameFromUSer
 function Create_DB
 { 
     ReadDBNameFromUSer
-    if test -d $DBname
+    if test -d ./database/$DBname
     then
         zenity --warning --title="Already exists!" --text="$DBname already exists!" --no-wrap
     else
-        mkdir /database/$DBname
+        mkdir ./database/$DBname
         zenity --info --title="success" --text="Database $DBname has been created successfully :)" --no-wrap
     fi
 
@@ -201,9 +201,9 @@ function Create_DB
 function Open_DB
 {
     ReadDBNameFromUSer
-    if test -d $DBname
+    if test -d ./database/$DBname
     then
-        cd $DBname
+        cd ./database/$DBname/
         echo "done"
         MainTables
     else
@@ -225,13 +225,13 @@ function list_DBs
 function Drop_DB
 {
     ReadDBNameFromUSer
-    if [ -d $DBname ]
+    if [ -d ./database/$DBname ]
     then
         input=$(whiptail --title "Are you sure you want to delete this Database?" --fb --menu "Confirm" 15 50 6 \
             "1" "yes" \
             "2" "no"  3>&1 1>&2 2>&3)
             case $input in
-                    1 )  rm -r $DBname
+                    1 )  rm -r ./database/$DBname
                          zenity --info --title="Success" --text="$DBname has been removed successfully" --no-wrap
                     ;;
                     2 )
@@ -411,7 +411,8 @@ function delete_record
    noOfCol=$(awk -F: 'END{print NR}' .$Tablename)    
    until [ $idx -gt $noOfCol ]
     do
-         colConstraint=$(awk -F'|' '{if(NR=='$idx') print $3}' .$Tablename)      # colConstraint = pk or ""
+         colConstraint=$(awk -F'|' '{if(N
+         R=='$idx') print $3}' .$Tablename)      # colConstraint = pk or ""
          if [[ "$colConstraint" == "PK" ]]     
         then
             # GET the Record number using the PK 
